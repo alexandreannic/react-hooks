@@ -11,6 +11,7 @@ export interface UseSetState<T> {
   size: number
   has: (t: T) => boolean
   reset: (values?: T[]) => void
+  get: Set<T>
 }
 
 export function useSetState<T>(initialValue: T[] = []): UseSetState<T> {
@@ -72,6 +73,8 @@ export function useSetState<T>(initialValue: T[] = []): UseSetState<T> {
 
   const values = useMemo(() => set.values(), [set])
 
+  const get = useMemo(() => new Set(set), [set])
+
   return {
     add,
     toggle,
@@ -82,6 +85,7 @@ export function useSetState<T>(initialValue: T[] = []): UseSetState<T> {
     has,
     toArray,
     values,
+    get,
     size: set.size,
   }
 }

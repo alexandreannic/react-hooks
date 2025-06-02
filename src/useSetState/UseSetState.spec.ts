@@ -72,4 +72,10 @@ describe.only('useSetState', () => {
     expect(result.current.has('a')).toBe(true)
     expect(result.current.has('b')).toBe(false)
   })
+
+  it('get() returns a new copy of the internal set', () => {
+    const {result} = renderHook(() => useSetState(['a', 'b']))
+    const copy = result.current.get
+    expect(copy).toEqual(new Set(['a', 'b']))
+  })
 })
