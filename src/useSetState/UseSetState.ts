@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useCallback, useMemo, useState} from 'react'
 
 export interface UseSetState<T> {
   add: (t: T | T[]) => void
@@ -6,59 +6,82 @@ export interface UseSetState<T> {
   toggleAll: (t: T[]) => void
   delete: (t: T | T[]) => boolean
   clear: () => void
-  values: () => Iterable<T>
-  toArray: () => T[]
+  values: Iterable<T>
+  toArray: T[]
   size: number
   has: (t: T) => boolean
   reset: (values?: T[]) => void
-  get: () => Set<T>,
 }
 
-export const useSetState = <T>(initialValue: T[] = []): UseSetState<T> => {
-  const [set, setSet] = useState(new Set<T>(initialValue))
+export function useSetState<T>(initialValue: T[] = []): UseSetState<T> {
+  const [set, setSet] = useState(() => new Set<T>(initialValue))
 
-  const add = (t: T | T[]): void => {
-    if (Array.isArray(t)) {
-      const newSet = new Set([...set.values(), ...t])
-      setSet(newSet)
-    } else {
-      set.add(t)
-      const newSet = new Set(set)
-      setSet(newSet)
-    }
-  }
+  const add = useCallback((t: T | T[]) => {
+    const items = Array.isArray(t) ? t : [t]
+    setSet(prev => new Set([...prev, ...items]))
+  }, [])
 
-  const remove = (t: T | T[]): boolean => {
-    const returnValue = [t].flatMap(_ => _).map(_ => set.delete(_))
-    setSet(new Set(set))
-    return returnValue[returnValue.length - 1]
-  }
+  const remove = useCallback((t: T | T[]): boolean => {
+    const items = Array.isArray(t) ? t : [t]
+    let result = false
+    setSet(prev => {
+      const newSet = new Set(prev)
+      items.forEach(item => {
+        const deleted = newSet.delete(item)
+        if (deleted) result = true
+      })
+      return newSet
+    })
+    return result
+  }, [])
 
-  const toggle = (t: T): void => {
-    set.has(t) ? remove(t) : add(t)
-  }
+  const toggle = useCallback((t: T) => {
+    setSet(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(t)) {
+        newSet.delete(t)
+      } else {
+        newSet.add(t)
+      }
+      return newSet
+    })
+  }, [])
 
-  const toggleAll = (t: T[]): void => {
-    t.map(t.every(_ => set.has(_)) ? remove : add)
-  }
+  const toggleAll = useCallback((items: T[]) => {
+    setSet(prev => {
+      const allPresent = items.every(item => prev.has(item))
+      const newSet = new Set(prev)
+      if (allPresent) {
+        items.forEach(item => newSet.delete(item))
+      } else {
+        items.forEach(item => newSet.add(item))
+      }
+      return newSet
+    })
+  }, [])
 
-  const clear = () => setSet(new Set())
+  const clear = useCallback(() => setSet(new Set()), [])
 
-  const reset = (values: T[] = []) => setSet(new Set(values))
+  const reset = useCallback((values: T[] = []) => {
+    setSet(new Set(values))
+  }, [])
 
-  const toArray = () => Array.from(set.values())
+  const has = useCallback((t: T) => set.has(t), [set])
+
+  const toArray = useMemo(() => Array.from(set), [set])
+
+  const values = useMemo(() => set.values(), [set])
 
   return {
-    has: (t: T) => set.has(t),
-    size: set.size,
-    get: () => new Set(toArray()),
-    toArray,
-    values: () => set.values(),
     add,
     toggle,
     toggleAll,
-    reset,
     delete: remove,
     clear,
+    reset,
+    has,
+    toArray,
+    values,
+    size: set.size,
   }
 }
