@@ -1,4 +1,4 @@
-import {render, act, waitFor, renderHook} from '@testing-library/react'
+import {act, renderHook, waitFor} from '@testing-library/react'
 import {useFetchers} from './UseFetchers'
 
 const mockFetcher = jest.fn(async (id: number) => {

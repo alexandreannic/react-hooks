@@ -1,7 +1,7 @@
 import {renderHook, act} from '@testing-library/react'
 import {useSetState} from './UseSetState'
 
-describe.only('useSetState', () => {
+describe('useSetState', () => {
   it('initializes with given values', () => {
     const {result} = renderHook(() => useSetState(['a', 'b']))
     expect(result.current.toArray.sort()).toEqual(['a', 'b'])

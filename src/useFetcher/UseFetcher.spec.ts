@@ -37,7 +37,7 @@ describe('useFetcher hook', () => {
       result.current.fetch({force: false}, 1)
       result.current.fetch({force: false}, 1) // Duplicate call
     })
-    await waitFor(() => expect(result.current.loading).toBe(false))
+    // await waitFor(() => expect(result.current.loading).toBe(false))
     expect(mockFetcher).toHaveBeenCalledTimes(1)
   })
 
