@@ -1,6 +1,7 @@
 export * from './useAsync/UseAsync'
 export * from './useBoolean/UseBoolean'
 export * from './useCrudList/UseCrudList'
+export * from './useDebounce/UseDebounce'
 export * from './useEffectFn/UseEffectFn'
 export * from './useFetcher/UseFetcher'
 export * from './useFormInput/UseFormInput'
